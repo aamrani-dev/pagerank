@@ -18,7 +18,7 @@ void initialize_b(std::vector<double>& b, int n){
 
 // Computes a step in the power iteration method.
 
-bool step(CSRMatrix A, std::vector<double>& b, double epsilon, int& value_index, double beta){
+bool step(CSRMatrix A, std::vector<double>& b, double epsilon, double beta){
 	int n = b.size();
 	std::vector<double> b_t(n);
 	b_t = b; 
@@ -26,12 +26,12 @@ bool step(CSRMatrix A, std::vector<double>& b, double epsilon, int& value_index,
 	bool converge = true; 
 	double max; 
 
-	b[0] = A.scalar_product_csr(b_t, 0, value_index,beta); 
+	b[0] = A.scalar_product_csr(b_t, 0, beta); 
 
 	max = b[0]; 
 
 	for(int i = 1 ; i < n; i++){
-		b[i] =  A.scalar_product_csr(b_t, i, value_index,beta);
+		b[i] =  A.scalar_product_csr(b_t, i, beta);
 		if(b[i] > max){
 			max = b[i] ; 
 		}
@@ -49,11 +49,9 @@ bool step(CSRMatrix A, std::vector<double>& b, double epsilon, int& value_index,
 
 void power_method(CSRMatrix A,std::vector<double>& b, double epsilon, double beta, int n){
 	initialize_b(b, n);
-	int value_index=0; 
 	bool converge = false;
 	int i = 0;
 	while(!converge){
-		converge = step(A,b, epsilon, value_index, beta) ; 
-		value_index = 0; 
+		converge = step(A,b, epsilon,beta) ; 
 	}
 }

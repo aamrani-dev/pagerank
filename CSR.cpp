@@ -47,8 +47,9 @@ void CSRMatrix::print_matrix(){
 
 } 	
 
-double CSRMatrix::scalar_product_csr(std::vector<double> v, int row, int& value_index, double beta){
+double CSRMatrix::scalar_product_csr(std::vector<double> v, int row, double beta){
 	int n = v.size(); 
+	int value_index = rows[row]; 
 	int nb_nonzeros = this->nb_nonzeros(row);
 	double sum=0.0;  
 	for(int j = 0; j < n; j++){

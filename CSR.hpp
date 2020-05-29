@@ -13,7 +13,7 @@ private:
 public:
 	CSRMatrix(std::vector<std::vector<double>> sparseMatrix, int n); 
 	void print_matrix();   
-	double scalar_product_csr(std::vector<double> v, int row, int& value_index, double beta); 
+	double scalar_product_csr(std::vector<double> v, int row, double beta); 
 }; 
 
 
