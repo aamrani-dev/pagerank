@@ -3,55 +3,68 @@
 #include <math.h>
 #include "pageRank.hpp"
 
-
+using namespace std; 
 
 // initialization of the dominant eigenvector. 
 
-void initialize_b(std::vector<double>& b, int n){
-	for(int i= 0; i < n; i++){
-		b.push_back(1.0); 
+void initialize_b(std::vector<double>& b){
+	int size = b.size(); 
+	for(int i= 0; i < size; i++){
+		b[i] = 1.0; 
 	}
 }
 
 
-
-
 // Computes a step in the power iteration method.
-
+std::vector<int> rows_set(int n){
+	std::vector<int> v;
+	for(int i = 0; i < n; i++)
+		v.push_back(i); 
+	return v; 
+}
 bool step(CSRMatrix A, std::vector<double>& b, double epsilon, double beta){
-	int n = b.size();
-	std::vector<double> b_t(n);
-	b_t = b; 
-	double value; 
-	bool converge = true; 
-	double max; 
+	int proc_rank = MPI::COMM_WORLD.Get_rank();
+	int nrows = A.get_nrows();
 
-	b[0] = A.scalar_product_csr(b_t, 0, beta); 
+	bool converge = true;
+	int n = b.size();  
+	std::vector<double> b_t;
+	b_t.resize(n); 
+	b_t = b;
+
+	std::vector<double> sub_b; 
+	sub_b.resize(nrows); 
+  
+	double max;
+
+	for(int i = 0 ; i < nrows; i++){
+		sub_b[i] =  A.scalar_product_csr(b,i,beta);
+	}
+
+	MPI::COMM_WORLD.Allgather(&sub_b[0], nrows, MPI::DOUBLE, &b[0], nrows, MPI::DOUBLE); 
 
 	max = b[0]; 
-
-	for(int i = 1 ; i < n; i++){
-		b[i] =  A.scalar_product_csr(b_t, i, beta);
-		if(b[i] > max){
-			max = b[i] ; 
-		}
+	for(int i = 1; i < n; i++){
+		if(b[i] > max)
+			max = b[i]; 
 	}
 	for (int i = 0; i< n; i++){
 		b[i] = b[i]/max; 
-		if(converge && abs(b[i]- b_t[i]) >= epsilon)
+		if(converge && abs(b[i]- b_t[i]) >= epsilon){
 			converge = false; 
-	}
+		}
+	}		
+
 	return converge; 
 
 }
 
 // It's computes the dominant eigenvector of a given Matrix A by using the power iteration method. 
 
-void power_method(CSRMatrix A,std::vector<double>& b, double epsilon, double beta, int n){
-	initialize_b(b, n);
+void power_method(CSRMatrix A,std::vector<double>& b, double epsilon, double beta){
+	initialize_b(b);
 	bool converge = false;
-	int i = 0;
-	while(!converge){
+	while(!converge ){
 		converge = step(A,b, epsilon,beta) ; 
 	}
 }

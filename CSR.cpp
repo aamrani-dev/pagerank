@@ -3,10 +3,10 @@
 #include <vector>
 
 
-CSRMatrix::CSRMatrix(std::vector<std::vector<double>> sparseMatrix, int n){
+CSRMatrix::CSRMatrix(std::vector<std::vector<double>> sparseMatrix, int nrows, int ncols){
 	rows.push_back(0); 
-	for(int i=0; i<n; i++){
-		for(int j=0; j<n; j++){
+	for(int i=0; i<nrows; i++){
+		for(int j=0; j<ncols; j++){
 			if(sparseMatrix[i][j]!=0){
 				values.push_back(sparseMatrix[i][j]); 
 				columns.push_back(j); 
@@ -49,10 +49,10 @@ void CSRMatrix::print_matrix(){
 
 double CSRMatrix::scalar_product_csr(std::vector<double> v, int row, double beta){
 	int n = v.size(); 
+
 	int value_index = rows[row]; 
-	int nb_nonzeros = this->nb_nonzeros(row);
-	double sum=0.0;  
-	for(int j = 0; j < n; j++){
+	double sum=0.0; 
+	for(int j = 0; j < n; j++){ 
 		if(columns[value_index] != j){
 			sum+= (1-beta)/n * v[j]; 
 		}
@@ -61,5 +61,11 @@ double CSRMatrix::scalar_product_csr(std::vector<double> v, int row, double beta
 			value_index++;  
 		}
 	}
+
 	return sum;	
+}
+
+
+int CSRMatrix::get_nrows(){
+	return rows.size()-1; 
 }
