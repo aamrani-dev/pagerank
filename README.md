@@ -18,7 +18,7 @@ First off, store you n * n martix row by row spacing the columns with blank spac
 
 For example for a 3 * 3 matrix the file **data.txt** will looks like: 
 
-1\n 2 3 
+1 2 3 
 4 5 6
 7 8 9 
 
