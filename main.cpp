@@ -53,7 +53,6 @@ int main(int argc, char *argv[]){
 
 
     CSRMatrix csr(data, rows_per_proc, 4); 	
-    csr.print_matrix(); 
 	std::vector<double> v;
 	v.resize(4); 
 	power_method(csr, v, epsilon, beta); 

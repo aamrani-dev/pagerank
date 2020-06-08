@@ -28,6 +28,7 @@ bool step(CSRMatrix A, std::vector<double>& b, double epsilon, double beta){
 
 	bool converge = true;
 	int n = b.size();  
+	
 	std::vector<double> b_t;
 	b_t.resize(n); 
 	b_t = b;
@@ -35,7 +36,8 @@ bool step(CSRMatrix A, std::vector<double>& b, double epsilon, double beta){
 	std::vector<double> sub_b; 
 	sub_b.resize(nrows); 
   
-	double max;
+	double global_max;
+	double local_max; 
 
 	for(int i = 0 ; i < nrows; i++){
 		sub_b[i] =  A.scalar_product_csr(b,i,beta);
@@ -43,13 +45,17 @@ bool step(CSRMatrix A, std::vector<double>& b, double epsilon, double beta){
 
 	MPI::COMM_WORLD.Allgather(&sub_b[0], nrows, MPI::DOUBLE, &b[0], nrows, MPI::DOUBLE); 
 
-	max = b[0]; 
-	for(int i = 1; i < n; i++){
-		if(b[i] > max)
-			max = b[i]; 
+	local_max  = sub_b[0]; 
+	for(int i =  0; i < nrows; i++){
+		if(local_max < sub_b[i])
+			local_max = sub_b[i] ; 
 	}
+
+	MPI::COMM_WORLD.Allreduce(&local_max, &global_max, 1, MPI::DOUBLE, MPI::MAX); 
+
+
 	for (int i = 0; i< n; i++){
-		b[i] = b[i]/max; 
+		b[i] = b[i]/global_max; 
 		if(converge && abs(b[i]- b_t[i]) >= epsilon){
 			converge = false; 
 		}
@@ -59,12 +65,12 @@ bool step(CSRMatrix A, std::vector<double>& b, double epsilon, double beta){
 
 }
 
-// It's computes the dominant eigenvector of a given Matrix A by using the power iteration method. 
+// It computes the dominant eigenvector of a given Matrix A by using the power iteration method. 
 
 void power_method(CSRMatrix A,std::vector<double>& b, double epsilon, double beta){
 	initialize_b(b);
 	bool converge = false;
 	while(!converge ){
-		converge = step(A,b, epsilon,beta) ; 
+		converge = step(A, b, epsilon, beta) ; 
 	}
 }
